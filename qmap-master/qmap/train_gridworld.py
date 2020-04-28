@@ -102,7 +102,9 @@ q_map = Q_Map(
     double_q=True
 )
 U.initialize()
-os.mkdir('{}/images'.format(path_name))
+if not os.path.exists(path_name):
+    os.mkdir(path_name)
+    os.mkdir('{}/images'.format(path_name))
 color_map = plt.get_cmap('inferno')
 
 # Train.
