@@ -24,7 +24,8 @@ gamma=0.9
 model_architecture="1"
 target=10000
 test_levels = ['level1', 'level2', 'level3']
-
+if not os.path.exists(path_name):
+    os.mkdir('{}/images'.format(path_name))
 # Create the environment.
 
 env = GridWorld()
@@ -37,18 +38,19 @@ env.seed(seed)
 test_obs = []
 test_qmaps = []
 image_indexes = []
-n_images = 20
 path = '{}/{}'.format(path_name, env.name)
 for level in test_levels:
-    obs_path = '{}/gridworld_obs_{}.npy'.format(path, level)
-    gt_path = '{}/gridworld_gound_truth_{}.npy'.format(path, level)
+    #obs_path = '{}/gridworld_obs_{}.npy'.format(path, level)
+    #gt_path = '{}/gridworld_gound_truth_{}.npy'.format(path, level)
+    obs_path = 'gridworld_obs_.npy'
+    gt_path = 'gridworld_gound_truth_.npy'
     if not os.path.isfile(obs_path) or not os.path.isfile(gt_path):
         temp_env = GridWorld(level)
-        temp_env.generate_ground_truth_qframes(path)
+        temp_env.generate_ground_truth_qframes(path_name)
         del temp_env
     test_obs.append(np.load(obs_path))
     test_qmaps.append(np.load(gt_path))
-    image_indexes.append(np.linspace(300, len(test_obs[-1]) - 300, n_images).astype(int))
+    image_indexes.append(np.linspace(300, len(test_obs[-1]) - 300, 20).astype(int))
 config = tf.ConfigProto(allow_soft_placement=True)
 config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
@@ -83,8 +85,7 @@ q_map = Q_Map(
     double_q=True
 )
 U.initialize()
-if not os.path.exists(path_name):
-    os.mkdir('{}/images'.format(path_name))
+
 color_map = plt.get_cmap('inferno')
 
 # Train.
