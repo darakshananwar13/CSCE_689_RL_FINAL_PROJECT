@@ -22,13 +22,12 @@ lr=1e-4
 batch=32
 gamma=0.9
 model_architecture="1"
-target=11000
-train_level = 'level1'
+target=10000
 test_levels = ['level1', 'level2', 'level3']
 
 # Create the environment.
 
-env = GridWorld(train_level)
+env = GridWorld()
 coords_shape = env.unwrapped.coords_shape
 set_global_seeds(seed)
 env.seed(seed)
@@ -60,20 +59,14 @@ if model_architecture == '1':
         convs=[(32, 8, 2), (32, 6, 2), (64, 4, 1)],
         middle_hiddens=[1024],
         deconvs=[(64, 4, 1), (32, 6, 2), (env.action_space.n, 4, 2)],
-        coords_shape=coords_shape,
-        dueling=True,
-        layer_norm=True,
-        activation_fn=tf.nn.elu
+        coords_shape=coords_shape
     )
 elif model_architecture == '2':
     q_map_model = ConvDeconvMap(
         convs=[(32, 8, 2), (32, 6, 2), (64, 4, 1)],
         middle_hiddens=[1024],
         deconvs=[(64, 4, 1), (32, 6, 2), (env.action_space.n, 8, 2)],
-        coords_shape=coords_shape,
-        dueling=True,
-        layer_norm=True,
-        activation_fn=tf.nn.elu
+        coords_shape=coords_shape
     )
 q_map = Q_Map(
     model=q_map_model,
@@ -91,9 +84,6 @@ q_map = Q_Map(
 )
 U.initialize()
 
-#agent_name = 'Qmap_{}_gamma{}_{}{}{}lr{}_batch{}_target{}'.format(model_architecture, gamma, 'dueling_' if True else '', 'double_' if True else '', 'layernorm_' if True else '',lr, batch, target)
-#sub_name = 'seed-{}_{}'.format(seed, datetime.utcnow().strftime('%F_%H-%M-%S-%f'))
-#path = '{}/{}/{}/{}'.format(path_name, env.name, agent_name, sub_name)
 loss_logger = CSVLogger(['steps'] + test_levels, '{}/ground_truth_loss'.format(path_name))
 os.mkdir('{}/images'.format(path_name))
 color_map = plt.get_cmap('inferno')
