@@ -83,7 +83,7 @@ q_map = Q_Map(
     double_q=True
 )
 U.initialize()
-if not os.path.exists(dir):
+if not os.path.exists(path_name):
     os.mkdir('{}/images'.format(path_name))
 color_map = plt.get_cmap('inferno')
 
