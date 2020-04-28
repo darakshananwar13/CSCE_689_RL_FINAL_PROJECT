@@ -34,11 +34,14 @@ test_obs = []
 test_qmaps = []
 image_indexes = []
 path = '{}/{}'.format(path_name, env.name)
+temp_env = GridWorld(level)
+temp_env.generate_ground_truth_qframes(path_name)
+del temp_env
 for level in ['level1', 'level2', 'level3']:
-    if not os.path.isfile("obs.npy") or not os.path.isfile("ground_truth.npy"):
-        temp_env = GridWorld(level)
-        temp_env.generate_ground_truth_qframes(path_name)
-        del temp_env
+    #if not os.path.isfile("obs.npy") or not os.path.isfile("ground_truth.npy"):
+    #    temp_env = GridWorld(level)
+    #    temp_env.generate_ground_truth_qframes(path_name)
+    #    del temp_env
     test_obs.append(np.load("obs.npy"))
     test_qmaps.append(np.load("ground_truth.npy"))
     image_indexes.append(np.linspace(300, len(test_obs[-1]) - 300, 20).astype(int))
@@ -105,4 +108,4 @@ for t in range(0,n_steps // batch + 1):
             all_images.append(np.concatenate((ob_images, true_images, pred_images), axis=0))
         img = np.concatenate(all_images, axis=0)
         Image.fromarray(img).save('{}/images/{}.png'.format(path_name, t))
-        print(t*batch, 'Losses:', *losses)
+        print('Loss for test levels:', *losses)
