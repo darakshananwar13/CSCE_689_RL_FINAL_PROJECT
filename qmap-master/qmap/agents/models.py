@@ -47,7 +47,7 @@ def ConvMlp(convs, hiddens, dueling=False, layer_norm=False):
 
 
 class ConvDeconvMap(object):
-    def __init__(self, convs, middle_hiddens, deconvs, coords_shape, dueling=True, layer_norm=True, activation_fn=tf.nn.elu):
+    def __init__(self, convs, middle_hiddens, deconvs, coords_shape, dueling, layer_norm, activation_fn):
         self.description = 'ConvDeconvMap-' + str(convs + middle_hiddens + deconvs) + '-' + activation_fn.__repr__().split(' ')[1]
         self.description = self.description.replace(' ', '')
         if dueling: self.description += '-duel'

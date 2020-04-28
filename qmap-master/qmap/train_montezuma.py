@@ -50,7 +50,10 @@ if args.qmap:
         convs=[(32, 8, 2), (32, 6, 2), (64, 4, 2)],
         middle_hiddens=[1024],
         deconvs=[(64, 4, 2), (32, 6, 2), (env.action_space.n, 4, 1)],
-        coords_shape=coords_shape
+        coords_shape=coords_shape,
+        dueling=True,
+        layer_norm=True,
+        activation_fn=tf.nn.elu
     )
     q_map_random_schedule = LinearSchedule(schedule_timesteps=n_steps, initial_p=0.1, final_p=0.05)
 else:

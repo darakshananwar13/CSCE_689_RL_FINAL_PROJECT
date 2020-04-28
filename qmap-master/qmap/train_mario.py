@@ -4,6 +4,7 @@ from baselines.common.misc_util import boolean_flag
 from baselines.common.schedules import LinearSchedule
 import tensorflow as tf
 import time
+
 from qmap.agents.models import ConvDeconvMap, ConvMlp
 from qmap.agents.q_map_dqn_agent import Q_Map_DQN_Agent
 from qmap.agents.replay_buffers import DoublePrioritizedReplayBuffer
@@ -22,38 +23,62 @@ boolean_flag(parser, 'dqn', default=True)
 boolean_flag(parser, 'qmap', default=True)
 boolean_flag(parser, 'render', help='play the videos', default=False)
 args = parser.parse_args()
-n_steps=1e3
-seed=0
-path="mario_results"
-load=None
-#load="model.ckpt"
-level="1.1"
-f=10000
 
+# n_steps = int(5e6)
+n_steps = int(args.n_steps)
 env = CustomSuperMarioAllStarsEnv(screen_ratio=4, coords_ratio=8, use_color=False, use_rc_frame=False, stack=3, frame_skip=2, action_repeat=4, level=args.level)
 coords_shape = env.coords_shape
-set_global_seeds(seed)
-env.seed(seed)
+set_global_seeds(args.seed)
+env.seed(args.seed)
 task_gamma = 0.99
+
+print('~~~~~~~~~~~~~~~~~~~~~~')
+print(env)
+print(env.unwrapped.name)
+print('observations:', env.observation_space.shape)
+print('coords:     ', coords_shape)
+print('actions:    ', env.action_space.n)
+print('~~~~~~~~~~~~~~~~~~~~~~')
 
 config = tf.ConfigProto(allow_soft_placement=True)
 config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 sess.__enter__()
-q_map_model = ConvDeconvMap(
+
+# Q-map
+if args.qmap:
+    q_map_model = ConvDeconvMap(
         convs=[(32, 8, 2), (32, 6, 2), (64, 4, 2)],
         middle_hiddens=[1024],
         deconvs=[(64, 4, 2), (32, 6, 2), (env.action_space.n, 4, 1)],
-        coords_shape=coords_shape
+        coords_shape=coords_shape,
+        dueling=True,
+        layer_norm=True,
+        activation_fn=tf.nn.elu
     )
-q_map_random_schedule = LinearSchedule(schedule_timesteps=n_steps, initial_p=0.1, final_p=0.05)
-dqn_model = ConvMlp(
+    q_map_random_schedule = LinearSchedule(schedule_timesteps=n_steps, initial_p=0.1, final_p=0.05)
+else:
+    q_map_model = None
+    q_map_random_schedule = None
+
+# DQN
+if args.dqn:
+    dqn_model = ConvMlp(
         convs=[(32, 8, 2), (32, 6, 2), (64, 4, 2)],
         hiddens=[1024],
         dueling=True,
     )
-exploration_schedule = LinearSchedule(schedule_timesteps=n_steps, initial_p=1.0, final_p=0.05)
-double_replay_buffer = DoublePrioritizedReplayBuffer(int(5e5), alpha=0.6, epsilon=1e-6, timesteps=n_steps, initial_p=0.4, final_p=1.0)
+    exploration_schedule = LinearSchedule(schedule_timesteps=n_steps, initial_p=1.0, final_p=0.05)
+else:
+    dqn_model = None
+    exploration_schedule = LinearSchedule(schedule_timesteps=n_steps, initial_p=1.0, final_p=1.0)
+
+
+if q_map_model is not None or dqn_model is not None:
+    double_replay_buffer = DoublePrioritizedReplayBuffer(int(5e5), alpha=0.6, epsilon=1e-6, timesteps=n_steps, initial_p=0.4, final_p=1.0)
+else:
+    double_replay_buffer = None
+
 
 agent_name = '{}M'.format(n_steps//int(1e6))
 agent = Q_Map_DQN_Agent(
@@ -63,14 +88,14 @@ agent = Q_Map_DQN_Agent(
     double_replay_buffer=double_replay_buffer,
     task_gamma=task_gamma,
     exploration_schedule=exploration_schedule,
-    seed=seed,
-    path=path,
+    seed=args.seed,
+    path=args.path,
     learning_starts=1000,
     train_freq=4,
     print_freq=1,
     env_name=env.unwrapped.name,
     agent_name=agent_name,
-    renderer_viewer=False,
+    renderer_viewer=args.render,
     # DQN
     dqn_q_func=dqn_model,
     dqn_lr=1e-4,
@@ -78,7 +103,7 @@ agent = Q_Map_DQN_Agent(
     dqn_batch_size=32,
     dqn_target_net_update_freq=1000,
     dqn_grad_norm_clip=1000,
-    dqn_model_save_freq=f,
+    dqn_model_save_freq=args.model_save_freq,
     # Q-Map
     q_map_model=q_map_model,
     q_map_random_schedule=q_map_random_schedule,
@@ -94,9 +119,9 @@ agent = Q_Map_DQN_Agent(
     q_map_max_goal_steps=30,
     q_map_grad_norm_clip=1000
 )
-if load is not None:
-    agent.load(load)
-agent.seed(seed)
+if args.load is not None:
+    agent.load(args.load)
+agent.seed(args.seed)
 
 env = PerfLogger(env, agent.task_gamma, agent.path)
 

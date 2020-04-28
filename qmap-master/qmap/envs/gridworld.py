@@ -120,7 +120,7 @@ class GridWorld(Env):
                 if render: self.render()
         all_coords = np.array(all_coords)
         all_obs = np.array(all_obs)
-        obs_path = 'obs'
+        obs_path = '{}/gridworld_obs_{}'.format(path, self.level)
         np.save(obs_path, all_obs)
         n = len(all_coords)
         print('{} coordinates found'.format(n))
@@ -161,7 +161,7 @@ class GridWorld(Env):
                 fig.canvas.draw()
         all_ground_truth = np.array(all_ground_truth)
         all_ground_truth = np.moveaxis(all_ground_truth, 1, -1)
-        gt_path = 'ground_truth'
+        gt_path = '{}/gridworld_gound_truth_{}'.format(path, self.level)
         np.save(gt_path, all_ground_truth)
         print('Q-frames saved in {}'.format(gt_path))
 
