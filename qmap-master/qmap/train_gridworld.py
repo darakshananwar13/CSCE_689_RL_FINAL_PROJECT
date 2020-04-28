@@ -4,15 +4,13 @@ from baselines.common.misc_util import boolean_flag
 from baselines.common.schedules import LinearSchedule
 import baselines.common.tf_util as U
 from datetime import datetime
-# from gym.envs.classic_control import rendering
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-# from scipy.misc import toimage
 from PIL import Image
 import tensorflow as tf
 
-from qmap.agents.models import ConvDeconvMap, MlpMap
+from qmap.agents.models import ConvDeconvMap
 from qmap.agents.q_map_dqn_agent import Q_Map
 from qmap.envs.gridworld import GridWorld
 from qmap.utils.csv_logger import CSVLogger
@@ -93,11 +91,11 @@ q_map = Q_Map(
 )
 U.initialize()
 
-agent_name = 'Qmap_{}_gamma{}_{}{}{}lr{}_batch{}_target{}'.format(model_architecture, gamma, 'dueling_' if True else '', 'double_' if True else '', 'layernorm_' if True else '',lr, batch, target)
-sub_name = 'seed-{}_{}'.format(seed, datetime.utcnow().strftime('%F_%H-%M-%S-%f'))
-path = '{}/{}/{}/{}'.format(path_name, env.name, agent_name, sub_name)
-loss_logger = CSVLogger(['steps'] + test_levels, '{}/ground_truth_loss'.format(path))
-os.mkdir('{}/images'.format(path))
+#agent_name = 'Qmap_{}_gamma{}_{}{}{}lr{}_batch{}_target{}'.format(model_architecture, gamma, 'dueling_' if True else '', 'double_' if True else '', 'layernorm_' if True else '',lr, batch, target)
+#sub_name = 'seed-{}_{}'.format(seed, datetime.utcnow().strftime('%F_%H-%M-%S-%f'))
+#path = '{}/{}/{}/{}'.format(path_name, env.name, agent_name, sub_name)
+loss_logger = CSVLogger(['steps'] + test_levels, '{}/ground_truth_loss'.format(path_name))
+os.mkdir('{}/images'.format(path_name))
 color_map = plt.get_cmap('inferno')
 
 # Train.
@@ -140,6 +138,6 @@ for t in range(n_steps // q_map.batch_size + 1):
             true_images = np.concatenate((color_map(true_qmaps[image_indexes[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
             all_images.append(np.concatenate((ob_images, true_images, pred_images), axis=0))
         img = np.concatenate(all_images, axis=0)
-        Image.fromarray(img).save('{}/images/{}.png'.format(path, t))
+        Image.fromarray(img).save('{}/images/{}.png'.format(path_name, t))
         print(t*batch, 'Losses:', *losses)
         loss_logger.log(t, *losses)
