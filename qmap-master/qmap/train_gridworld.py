@@ -1,19 +1,14 @@
-import argparse
+import tensorflow as tf
 from baselines.common import set_global_seeds
 from baselines.common.misc_util import boolean_flag
-from baselines.common.schedules import LinearSchedule
-import baselines.common.tf_util as U
-from datetime import datetime
+import baselines.common.tf_util as baseline_util
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 from PIL import Image
-import tensorflow as tf
-
 from qmap.agents.models import ConvDeconvMap
 from qmap.agents.q_map_dqn_agent import Q_Map
 from qmap.envs.gridworld import GridWorld
-from qmap.utils.csv_logger import CSVLogger
 
 seed=0
 n_steps=1000
@@ -27,6 +22,9 @@ config = tf.ConfigProto(allow_soft_placement=True)
 config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 sess.__enter__()
+
+baseline_util.initialize()
+
 test_levels = ['level1', 'level2', 'level3']
 if not os.path.exists(path_name):
     os.mkdir('{}/images'.format(path_name))
@@ -49,21 +47,13 @@ for level in test_levels:
 
 
 if model_architecture == '1':
-    q_map_model = ConvDeconvMap(
-        convs=[(32, 8, 2), (32, 6, 2), (64, 4, 1)],
-        middle_hiddens=[1024],
-        deconvs=[(64, 4, 1), (32, 6, 2), (env.action_space.n, 4, 2)],
-        coords_shape=coords_shape
+    model = ConvDeconvMap(convs=[(32, 8, 2), (32, 6, 2), (64, 4, 1)],middle_hiddens=[1024],deconvs=[(64, 4, 1), (32, 6, 2), (env.action_space.n, 4, 2)],coords_shape=coords_shape
     )
 elif model_architecture == '2':
-    q_map_model = ConvDeconvMap(
-        convs=[(32, 8, 2), (32, 6, 2), (64, 4, 1)],
-        middle_hiddens=[1024],
-        deconvs=[(64, 4, 1), (32, 6, 2), (env.action_space.n, 8, 2)],
-        coords_shape=coords_shape
+    model = ConvDeconvMap(convs=[(32, 8, 2), (32, 6, 2), (64, 4, 1)],middle_hiddens=[1024],deconvs=[(64, 4, 1), (32, 6, 2), (env.action_space.n, 8, 2)],coords_shape=coords_shape
     )
 q_map = Q_Map(
-    model=q_map_model,
+    model=model,
     observation_space=env.observation_space,
     coords_shape=env.unwrapped.coords_shape,
     n_actions=env.action_space.n,
@@ -76,20 +66,16 @@ q_map = Q_Map(
     grad_norm_clip=1000,
     double_q=True
 )
-U.initialize()
-
-color_map = plt.get_cmap('inferno')
-
-# Train.
-
-batch_weights = np.ones(q_map.batch_size)
-batch_dones = np.zeros((q_map.batch_size, 1))
-for t in range(n_steps // q_map.batch_size + 1):
+baseline_util.initialize()
+c_map = plt.get_cmap('inferno')
+weights = np.ones(batch)
+completed = np.zeros((batch, 1))
+for t in range(0,n_steps // batch + 1):
     batch_prev_frames = []
     batch_ac = []
     batch_rcw = []
     batch_frames = []
-    for _ in range(q_map.batch_size):
+    for _ in range(0,batch):
         prev_ob = env.random_reset()
         ac = env.action_space.sample()
         ob = env.step(ac)[0]
@@ -103,7 +89,7 @@ for t in range(n_steps // q_map.batch_size + 1):
     batch_ac = np.array(batch_ac)
     batch_rcw = np.array(batch_rcw)[:, None, :]
     batch_frames = np.array(batch_frames)
-    q_map._optimize(batch_prev_frames, batch_ac, batch_rcw, batch_frames, batch_dones, batch_weights)
+    q_map._optimize(batch_prev_frames, batch_ac, batch_rcw, batch_frames, completed, weights)
     if t % target == 0:
         q_map.update_target()
 
@@ -116,8 +102,8 @@ for t in range(n_steps // q_map.batch_size + 1):
             loss = np.mean((pred_qmaps - true_qmaps)**2)
             losses.append(loss)
             ob_images = np.concatenate(test_obs[i_level][image_indexes[i_level]], axis=1)
-            pred_images = np.concatenate((color_map(pred_qmaps[image_indexes[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
-            true_images = np.concatenate((color_map(true_qmaps[image_indexes[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
+            pred_images = np.concatenate((c_map(pred_qmaps[image_indexes[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
+            true_images = np.concatenate((c_map(true_qmaps[image_indexes[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
             all_images.append(np.concatenate((ob_images, true_images, pred_images), axis=0))
         img = np.concatenate(all_images, axis=0)
         Image.fromarray(img).save('{}/images/{}.png'.format(path_name, t))
