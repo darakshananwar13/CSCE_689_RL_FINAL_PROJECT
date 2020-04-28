@@ -8,7 +8,7 @@ import os
 from PIL import Image
 from qmap.agents.models import ConvDeconvMap
 from qmap.agents.q_map_dqn_agent import Q_Map
-from qmap.envs.gridworld import GridWorld
+from gridworld import GridWorld
 
 seed=0
 n_steps=1000
