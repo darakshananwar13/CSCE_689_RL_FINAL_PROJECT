@@ -163,6 +163,4 @@ class GridWorld(Env):
         all_ground_truth = np.moveaxis(all_ground_truth, 1, -1)
         gt_path = 'ground_truth'
         np.save(gt_path, all_ground_truth)
-
-
         plt.close(fig)
