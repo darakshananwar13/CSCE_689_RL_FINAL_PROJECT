@@ -20,7 +20,7 @@ class GridWorld(Env):
         self.coords_shape = (self.height // scale, self.width // scale)
         self.available_coords = np.array(np.where(np.logical_not(self.walls))).transpose()
         self.action_space = spaces.Discrete(4)
-        #self.name = 'GridWorld_obs{}x{}x3_qframes{}x{}x4-v0'.format(*self.screen_shape, *self.coords_shape)
+        self.name = 'GridWorld_obs{}x{}x3_qframes{}x{}x4-v0'.format(*self.screen_shape, *self.coords_shape)
         self.viewer = None
         self.seed()
 
@@ -59,8 +59,6 @@ class GridWorld(Env):
         assert r < self.coords_shape[0] and c-w < self.coords_shape[1], ((r, c, w), (self.r, self.c, self.w), self.coords_shape)
         self.full_c = self.c
         return frames, (r, c, w), (self.r, self.c)
-
-    # Generate ground truth Q-frames by finding the smallest number of steps towards all coordinates given a window position.
     def ground_truth_distances(self, w):
         walls = self.padded_walls[:, self.padding+w:self.padding+w+self.width]
         x = np.full((self.height, self.width + 2), np.inf)
@@ -74,7 +72,6 @@ class GridWorld(Env):
             x = next_x
         x = np.power(0.9, x[:,1:-1])
         return x
-
     def generate_ground_truth_qframes(self, path):
         if not os.path.exists(path):
             os.makedirs(path)

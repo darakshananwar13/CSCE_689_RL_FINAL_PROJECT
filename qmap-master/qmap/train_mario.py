@@ -4,7 +4,6 @@ from baselines.common.misc_util import boolean_flag
 from baselines.common.schedules import LinearSchedule
 import tensorflow as tf
 import time
-
 from qmap.agents.models import ConvDeconvMap, ConvMlp
 from qmap.agents.q_map_dqn_agent import Q_Map_DQN_Agent
 from qmap.agents.replay_buffers import DoublePrioritizedReplayBuffer
@@ -23,9 +22,10 @@ boolean_flag(parser, 'dqn', default=True)
 boolean_flag(parser, 'qmap', default=True)
 boolean_flag(parser, 'render', help='play the videos', default=False)
 args = parser.parse_args()
+n_steps=1e3
+seed=0
+path="mario_results"
 
-# n_steps = int(5e6)
-n_steps = int(args.n_steps)
 env = CustomSuperMarioAllStarsEnv(screen_ratio=4, coords_ratio=8, use_color=False, use_rc_frame=False, stack=3, frame_skip=2, action_repeat=4, level=args.level)
 coords_shape = env.coords_shape
 set_global_seeds(args.seed)
