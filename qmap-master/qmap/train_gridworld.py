@@ -83,8 +83,6 @@ q_map = Q_Map(
     double_q=True
 )
 U.initialize()
-
-loss_logger = CSVLogger(['steps'] + test_levels, '{}/ground_truth_loss'.format(path_name))
 os.mkdir('{}/images'.format(path_name))
 color_map = plt.get_cmap('inferno')
 
@@ -130,4 +128,3 @@ for t in range(n_steps // q_map.batch_size + 1):
         img = np.concatenate(all_images, axis=0)
         Image.fromarray(img).save('{}/images/{}.png'.format(path_name, t))
         print(t*batch, 'Losses:', *losses)
-        loss_logger.log(t, *losses)
