@@ -6,20 +6,26 @@ import os
 
 
 class GridWorld(Env):
+    metadata = {'render.modes': ['human', 'rgb_array']}
+
     def __init__(self, level='level1', scale=1):
         self.level = level
         if not '.' in level: level += '.bmp'
         self.walls = np.logical_not(plt.imread(os.path.join(os.path.dirname(os.path.realpath(__file__)), level)))
         self.height = self.walls.shape[0]
         self.width = 32
+        # observations
         self.screen_shape = (self.height, self.width)
         self.padding = self.width // 2 - 1
         self.padded_walls = np.logical_not(np.pad(np.logical_not(self.walls), ((0, 0), (self.padding, self.padding)), 'constant'))
         self.observation_space = spaces.Box(0, 255, (self.height, self.width, 3), dtype=np.float32)
+        # coordinates
         self.scale = scale
         self.coords_shape = (self.height // scale, self.width // scale)
         self.available_coords = np.array(np.where(np.logical_not(self.walls))).transpose()
+        # actions
         self.action_space = spaces.Discrete(4)
+        # miscellaneous
         self.name = 'GridWorld_obs{}x{}x3_qframes{}x{}x4-v0'.format(*self.screen_shape, *self.coords_shape)
         self.viewer = None
         self.seed()
@@ -59,6 +65,26 @@ class GridWorld(Env):
         assert r < self.coords_shape[0] and c-w < self.coords_shape[1], ((r, c, w), (self.r, self.c, self.w), self.coords_shape)
         self.full_c = self.c
         return frames, (r, c, w), (self.r, self.c)
+
+    def render(self, mode='human', close=False):
+        if close:
+            if self.viewer is not None:
+                self.viewer.close()
+                self.viewer = None
+        img = self.get_obs()[0]
+        if mode == 'rgb_array':
+            return img
+        elif mode == 'human':
+            from gym.envs.classic_control import rendering
+            from scipy.ndimage import zoom
+            if self.viewer is None:
+                self.viewer = rendering.SimpleImageViewer()
+            img = zoom(img, [5, 5, 1], order=0)
+            self.viewer.imshow(img)
+        else:
+            raise NotImplementedError
+
+    # Generate ground truth Q-frames by finding the smallest number of steps towards all coordinates given a window position.
     def ground_truth_distances(self, w):
         walls = self.padded_walls[:, self.padding+w:self.padding+w+self.width]
         x = np.full((self.height, self.width + 2), np.inf)
@@ -72,11 +98,16 @@ class GridWorld(Env):
             x = next_x
         x = np.power(0.9, x[:,1:-1])
         return x
+
     def generate_ground_truth_qframes(self, path):
         if not os.path.exists(path):
             os.makedirs(path)
+
+        print('Generating possible observations and coordinates...')
+
         all_coords = []
         all_obs = []
+        render = False
         for c in range(1, self.width - 1):
             for r in range(1, self.height - 1):
                 if self.walls[r, c]: continue
@@ -86,12 +117,16 @@ class GridWorld(Env):
                 self.c = c
                 self.w = w
                 all_obs.append(self.get_obs()[0])
+                if render: self.render()
         all_coords = np.array(all_coords)
         all_obs = np.array(all_obs)
         obs_path = 'obs'
         np.save(obs_path, all_obs)
         n = len(all_coords)
+        print('{} coordinates found'.format(n))
+        print('Coordiantes saved in {}'.format(obs_path))
 
+        print('Generating ground truth Q-frames...')
 
         np.set_printoptions(precision=3, linewidth=300, edgeitems=100)
         plt.ion()
@@ -111,10 +146,13 @@ class GridWorld(Env):
                 self.w = w
                 self.step(a)
                 ground_truth = self.ground_truth_distances(w)
+                # take the movement of the window into account
                 dw = self.w - w
                 actions_ground_truth.append(ground_truth)
             all_ground_truth.append(actions_ground_truth)
+            # render
             if (i + 1) % (n // n_prints) == 0:
+                print('{}%'.format(round(100 * (i + 1) / n)))
                 for a in range(4):
                     ac_axes[a].clear()
                     ac_axes[a].imshow(actions_ground_truth[a], 'inferno')
@@ -125,4 +163,6 @@ class GridWorld(Env):
         all_ground_truth = np.moveaxis(all_ground_truth, 1, -1)
         gt_path = 'ground_truth'
         np.save(gt_path, all_ground_truth)
+
+
         plt.close(fig)
