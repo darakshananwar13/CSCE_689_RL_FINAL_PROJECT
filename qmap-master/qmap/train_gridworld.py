@@ -94,7 +94,7 @@ for t in range(0,n_steps // batch + 1):
     if t % 50 == 0:
         losses = []
         all_images = []
-        for i_level in range(len(test_levels)):
+        for i_level in range(0,3):
             pred_qmaps = q_map.compute_q_values(test_obs[i_level])
             true_qmaps = test_qmaps[i_level]
             loss = np.mean((pred_qmaps - true_qmaps)**2)
