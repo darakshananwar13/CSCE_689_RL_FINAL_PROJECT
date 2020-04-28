@@ -23,6 +23,10 @@ batch=32
 gamma=0.9
 model_architecture="1"
 target=10000
+config = tf.ConfigProto(allow_soft_placement=True)
+config.gpu_options.allow_growth = True
+sess = tf.Session(config=config)
+sess.__enter__()
 test_levels = ['level1', 'level2', 'level3']
 if not os.path.exists(path_name):
     os.mkdir('{}/images'.format(path_name))
@@ -35,17 +39,14 @@ test_qmaps = []
 image_indexes = []
 path = '{}/{}'.format(path_name, env.name)
 for level in test_levels:
-    if not os.path.isfile("obs.npy") or not os.path.isfile("ground_truth"):
+    if not os.path.isfile("obs.npy") or not os.path.isfile("ground_truth.npy"):
         temp_env = GridWorld(level)
         temp_env.generate_ground_truth_qframes(path_name)
         del temp_env
     test_obs.append(np.load("obs.npy"))
-    test_qmaps.append(np.load("ground_truth"))
+    test_qmaps.append(np.load("ground_truth.npy"))
     image_indexes.append(np.linspace(300, len(test_obs[-1]) - 300, 20).astype(int))
-config = tf.ConfigProto(allow_soft_placement=True)
-config.gpu_options.allow_growth = True
-sess = tf.Session(config=config)
-sess.__enter__()
+
 
 if model_architecture == '1':
     q_map_model = ConvDeconvMap(
