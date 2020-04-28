@@ -26,23 +26,16 @@ target=10000
 test_levels = ['level1', 'level2', 'level3']
 if not os.path.exists(path_name):
     os.mkdir('{}/images'.format(path_name))
-# Create the environment.
-
 env = GridWorld()
 coords_shape = env.unwrapped.coords_shape
 set_global_seeds(seed)
 env.seed(seed)
-
-# Generate the observations and ground truth Q-frames.
-
 test_obs = []
 test_qmaps = []
 image_indexes = []
 path = '{}/{}'.format(path_name, env.name)
 for level in test_levels:
-    #obs_path = 'obs.npy'
-    #gt_path = 'gound_truth.npy'
-    if not os.path.isfile(obs_path) or not os.path.isfile(gt_path):
+    if not os.path.isfile("obs.npy") or not os.path.isfile("ground_truth"):
         temp_env = GridWorld(level)
         temp_env.generate_ground_truth_qframes(path_name)
         del temp_env
