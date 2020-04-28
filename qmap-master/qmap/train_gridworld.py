@@ -32,8 +32,7 @@ boolean_flag(parser, 'norm', default=True)
 boolean_flag(parser, 'double', default=True)
 boolean_flag(parser, 'render', default=False)
 args = parser.parse_args()
-# n_steps = int(1e8)
-#n_steps = int(args.n_steps)
+seed=0
 n_steps=1000
 train_level = 'level1'
 test_levels = ['level1', 'level2', 'level3']
@@ -42,8 +41,8 @@ test_levels = ['level1', 'level2', 'level3']
 
 env = GridWorld(train_level)
 coords_shape = env.unwrapped.coords_shape
-set_global_seeds(args.seed)
-env.seed(args.seed)
+set_global_seeds(seed)
+env.seed(seed)
 
 print('~~~~~~~~~~~~~~~~~~~~~~')
 print(env)
