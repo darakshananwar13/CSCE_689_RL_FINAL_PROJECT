@@ -25,27 +25,31 @@ sess.__enter__()
 
 baseline_util.initialize()
 if not os.path.exists(path_name):
+    os.mkdir(path_name)
     os.mkdir('{}/images'.format(path_name))
 env = GridWorld()
 coords_shape = env.unwrapped.coords_shape
 set_global_seeds(seed)
 env.seed(seed)
-test_obs = []
-test_qmaps = []
-image_indexes = []
-path = '{}/{}'.format(path_name, env.name)
-temp_env = GridWorld(level)
+observation = []
+qmaps = []
+test_images = []
+temp_env = GridWorld('level1')
 temp_env.generate_ground_truth_qframes(path_name)
 del temp_env
-for level in ['level1', 'level2', 'level3']:
-    #if not os.path.isfile("obs.npy") or not os.path.isfile("ground_truth.npy"):
-    #    temp_env = GridWorld(level)
-    #    temp_env.generate_ground_truth_qframes(path_name)
-    #    del temp_env
-    test_obs.append(np.load("obs.npy"))
-    test_qmaps.append(np.load("ground_truth.npy"))
-    image_indexes.append(np.linspace(300, len(test_obs[-1]) - 300, 20).astype(int))
-
+observation.append(np.load("obs.npy"))
+qmaps.append(np.load("ground_truth.npy"))
+test_images.append(np.linspace(300, len(observation[-1]) - 300, 20).astype(int))
+temp_env = GridWorld('level2')
+temp_env.generate_ground_truth_qframes(path_name)
+observation.append(np.load("obs.npy"))
+qmaps.append(np.load("ground_truth.npy"))
+test_images.append(np.linspace(300, len(observation[-1]) - 300, 20).astype(int))
+temp_env = GridWorld('level3')
+temp_env.generate_ground_truth_qframes(path_name)
+observation.append(np.load("obs.npy"))
+qmaps.append(np.load("ground_truth.npy"))
+test_images.append(np.linspace(300, len(observation[-1]) - 300, 20).astype(int))
 
 if model_architecture == '1':
     model = ConvDeconvMap(convs=[(32, 8, 2), (32, 6, 2), (64, 4, 1)],middle_hiddens=[1024],deconvs=[(64, 4, 1), (32, 6, 2), (env.action_space.n, 4, 2)],coords_shape=coords_shape
@@ -67,7 +71,6 @@ q_map = Q_Map(
     grad_norm_clip=1000,
     double_q=True
 )
-baseline_util.initialize()
 c_map = plt.get_cmap('inferno')
 weights = np.ones(batch)
 completed = np.zeros((batch, 1))
@@ -93,19 +96,18 @@ for t in range(0,n_steps // batch + 1):
     q_map._optimize(batch_prev_frames, batch_ac, batch_rcw, batch_frames, completed, weights)
     if t % target == 0:
         q_map.update_target()
-
     if t % 50 == 0:
         losses = []
         all_images = []
         for i_level in range(0,3):
-            pred_qmaps = q_map.compute_q_values(test_obs[i_level])
-            true_qmaps = test_qmaps[i_level]
+            pred_qmaps = q_map.compute_q_values(observation[i_level])
+            true_qmaps = qmaps[i_level]
             loss = np.mean((pred_qmaps - true_qmaps)**2)
             losses.append(loss)
-            ob_images = np.concatenate(test_obs[i_level][image_indexes[i_level]], axis=1)
-            pred_images = np.concatenate((c_map(pred_qmaps[image_indexes[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
-            true_images = np.concatenate((c_map(true_qmaps[image_indexes[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
+            ob_images = np.concatenate(observation[i_level][test_images[i_level]], axis=1)
+            pred_images = np.concatenate((c_map(pred_qmaps[test_images[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
+            true_images = np.concatenate((c_map(true_qmaps[test_images[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
             all_images.append(np.concatenate((ob_images, true_images, pred_images), axis=0))
         img = np.concatenate(all_images, axis=0)
         Image.fromarray(img).save('{}/images/{}.png'.format(path_name, t))
-        print('Loss for test levels:', *losses)
+        print('Loss for tesi levels:', *losses)
