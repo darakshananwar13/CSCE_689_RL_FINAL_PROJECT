@@ -6,7 +6,7 @@ import os
 
 
 class GridWorld(Env):
-    #metadata = {'render.modes': ['human', 'rgb_array']}
+    metadata = {'render.modes': ['human', 'rgb_array']}
 
     def __init__(self, level='level1', scale=1):
         self.level = level
@@ -123,7 +123,10 @@ class GridWorld(Env):
         obs_path = 'obs'
         np.save(obs_path, all_obs)
         n = len(all_coords)
+        print('{} coordinates found'.format(n))
+        print('Coordiantes saved in {}'.format(obs_path))
 
+        print('Generating ground truth Q-frames...')
 
         np.set_printoptions(precision=3, linewidth=300, edgeitems=100)
         plt.ion()
@@ -160,4 +163,6 @@ class GridWorld(Env):
         all_ground_truth = np.moveaxis(all_ground_truth, 1, -1)
         gt_path = 'ground_truth'
         np.save(gt_path, all_ground_truth)
+        print('Q-frames saved in {}'.format(gt_path))
+
         plt.close(fig)
