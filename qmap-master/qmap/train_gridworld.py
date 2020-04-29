@@ -1,14 +1,11 @@
-import argparse
 from baselines.common import set_global_seeds
 from baselines.common.misc_util import boolean_flag
 from baselines.common.schedules import LinearSchedule
-import baselines.common.tf_util as U
+import baselines.common.tf_util as baseline.util
 from datetime import datetime
-# from gym.envs.classic_control import rendering
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-# from scipy.misc import toimage
 from PIL import Image
 import tensorflow as tf
 
@@ -101,7 +98,7 @@ q_map = Q_Map(
     grad_norm_clip=1000,
     double_q=True
 )
-U.initialize()
+baseline_util.initialize()
 if not os.path.exists(path_name):
     os.mkdir(path_name)
     os.mkdir('{}/images'.format(path_name))
@@ -147,5 +144,5 @@ for t in range(n_steps // q_map.batch_size + 1):
             true_images = np.concatenate((color_map(true_qmaps[image_indexes[i_level]].max(3))[:, :, :, :3] * 255).astype(np.uint8), axis=1)
             all_images.append(np.concatenate((ob_images, true_images, pred_images), axis=0))
         img = np.concatenate(all_images, axis=0)
-        Image.fromarray(img).save('{}/images/{}.png'.format(path_name, t))
+        #Image.fromarray(img).save('{}/images/{}.png'.format(path_name, t))
         print(t*batch, 'Losses:', *losses)
