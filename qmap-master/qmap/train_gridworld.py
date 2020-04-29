@@ -9,27 +9,11 @@ import os
 from PIL import Image
 import tensorflow as tf
 
-from qmap.agents.models import ConvDeconvMap, MlpMap
-from qmap.agents.q_map_dqn_agent import Q_Map
-from qmap.envs.gridworld import GridWorld
+from qmap.models import ConvDeconvMap, MlpMap
+from qmap.q_map_dqn_agent import Q_Map
+from qmap.gridworld import GridWorld
 from qmap.utils.csv_logger import CSVLogger
 
-import argparse
-from baselines.common import set_global_seeds
-from baselines.common.misc_util import boolean_flag
-from baselines.common.schedules import LinearSchedule
-import baselines.common.tf_util as U
-from datetime import datetime
-import matplotlib.pyplot as plt
-import numpy as np
-import os
-from PIL import Image
-import tensorflow as tf
-
-from qmap.agents.models import ConvDeconvMap
-from qmap.agents.q_map_dqn_agent import Q_Map
-from qmap.envs.gridworld import GridWorld
-from qmap.utils.csv_logger import CSVLogger
 
 seed=0
 n_steps=1000
