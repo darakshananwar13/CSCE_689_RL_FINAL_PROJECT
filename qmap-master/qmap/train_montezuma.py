@@ -1,4 +1,3 @@
-import argparse
 from baselines.common import set_global_seeds
 from baselines.common.misc_util import boolean_flag
 from baselines.common.schedules import LinearSchedule
@@ -9,20 +8,11 @@ from qmap.q_map_dqn_agent import Q_Map_DQN_Agent
 from qmap.replay_buffers import DoublePrioritizedReplayBuffer
 from qmap.custom_montezuma import CustomMontezumaEnv
 from qmap.wrappers import PerfLogger
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--seed', help='RNG seed', type=int, default=0)
-parser.add_argument('--path', default='qmap_results')
-parser.add_argument('--load', help='path to the agent to load', default=None)
-parser.add_argument('--n_steps', help='no. of training Epochs', type=float, default=5e6)
-parser.add_argument('--model_save_freq', help='model save frequncy', type=int, default=100000)
-boolean_flag(parser, 'dqn', default=True)
-boolean_flag(parser, 'qmap', default=True)
-boolean_flag(parser, 'render', help='play the videos', default=False)
+
 seed=0
 path="qmap_results"
 n_steps=int(1000)
 save_freq=10000
-args = parser.parse_args()
 
 env = CustomMontezumaEnv(screen_ratio=4, coords_ratio=8, use_color=False, use_rc_frame=False, stack=3, frame_skip=2, action_repeat=4)
 coords_shape = env.coords_shape
