@@ -13,7 +13,7 @@ n_steps = 1e3
 seed=0
 model_save=100000
 path="qmap_results"
-env = CustomSuperMarioAllStarsEnv(screen_ratio=4, coords_ratio=8, use_color=False, use_rc_frame=False, stack=3, frame_skip=2, action_repeat=4, level=args.level)
+env = CustomSuperMarioAllStarsEnv(screen_ratio=4, coords_ratio=8, use_color=False, use_rc_frame=False, stack=3, frame_skip=2, action_repeat=4)
 coords_shape = env.coords_shape
 set_global_seeds(seed)
 env.seed(seed)
