@@ -40,16 +40,10 @@ gamma=0.9
 model_architecture="1"
 target=10000
 test_levels = ['level1', 'level2', 'level3']
-
-# Create the environment.
-
 env = GridWorld()
 coords_shape = env.unwrapped.coords_shape
 set_global_seeds(seed)
 env.seed(seed)
-
-# Generate the observations and ground truth Q-frames.
-
 test_obs = []
 test_qmaps = []
 image_indexes = []
@@ -106,10 +100,10 @@ color_map = plt.get_cmap('inferno')
 
 # Train.
 
-batch_weights = np.ones(q_map.batch_size)
-batch_dones = np.zeros((q_map.batch_size, 1))
+weights = np.ones(q_map.batch_size)
+completed_batch = np.zeros((q_map.batch_size, 1))
 for t in range(n_steps // q_map.batch_size + 1):
-    batch_prev_frames = []
+    prev_frames = []
     batch_ac = []
     batch_rcw = []
     batch_frames = []
@@ -119,15 +113,15 @@ for t in range(n_steps // q_map.batch_size + 1):
         ob = env.step(ac)[0]
         prev_frames, (_, _, prev_w), _, _ = prev_ob
         frames, (row, col, w), _, _ = ob
-        batch_prev_frames.append(prev_frames)
+        prev_frames.append(prev_frames)
         batch_ac.append(ac)
         batch_rcw.append((row, col-w, w-prev_w))
         batch_frames.append(frames)
-    batch_prev_frames = np.array(batch_prev_frames)
+    prev_frames = np.array(prev_frames)
     batch_ac = np.array(batch_ac)
     batch_rcw = np.array(batch_rcw)[:, None, :]
     batch_frames = np.array(batch_frames)
-    q_map._optimize(batch_prev_frames, batch_ac, batch_rcw, batch_frames, batch_dones, batch_weights)
+    q_map._optimize(prev_frames, batch_ac, batch_rcw, batch_frames, completed_batch, weights)
     if t % target == 0:
         q_map.update_target()
 
