@@ -5,11 +5,11 @@ from baselines.common.schedules import LinearSchedule
 import tensorflow as tf
 import time
 
-from qmap.agents.models import ConvDeconvMap, ConvMlp
-from qmap.agents.q_map_dqn_agent import Q_Map_DQN_Agent
-from qmap.agents.replay_buffers import DoublePrioritizedReplayBuffer
-from qmap.envs.custom_mario import CustomSuperMarioAllStarsEnv
-from qmap.envs.wrappers import PerfLogger
+from qmap.models import ConvDeconvMap, ConvMlp
+from qmap.q_map_dqn_agent import Q_Map_DQN_Agent
+from qmap.replay_buffers import DoublePrioritizedReplayBuffer
+from qmap.custom_mario import CustomSuperMarioAllStarsEnv
+from qmap.wrappers import PerfLogger
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

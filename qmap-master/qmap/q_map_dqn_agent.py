@@ -8,7 +8,7 @@ import numpy as np
 import os
 import tensorflow as tf
 
-from qmap.agents.q_map_renderer import Q_Map_Renderer
+from qmap.q_map_renderer import Q_Map_Renderer
 from qmap.utils.csv_logger import CSVLogger
 
 

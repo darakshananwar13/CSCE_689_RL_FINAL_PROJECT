@@ -3,7 +3,6 @@ from gym import Env, spaces
 from gym.utils import seeding
 import numpy as np
 import retro
-# from scipy.misc import imresize
 from skimage.transform import resize
 
 from qmap.utils.lazy_frames import LazyFrames

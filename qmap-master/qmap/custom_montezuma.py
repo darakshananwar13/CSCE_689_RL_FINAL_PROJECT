@@ -3,7 +3,6 @@ import gym
 from gym import Env, spaces, utils
 from gym.utils import seeding
 import numpy as np
-# from scipy.misc import imresize
 from skimage.transform import resize
 
 from qmap.utils.lazy_frames import LazyFrames
