@@ -5,7 +5,7 @@ from gym.utils import seeding
 import numpy as np
 from skimage.transform import resize
 
-from qmap.utils.lazy_frames import LazyFrames
+from qmap.lazy_frames import LazyFrames
 
 
 actions = {

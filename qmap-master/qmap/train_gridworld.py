@@ -12,7 +12,7 @@ import tensorflow as tf
 from qmap.models import ConvDeconvMap, MlpMap
 from qmap.q_map_dqn_agent import Q_Map
 from qmap.gridworld import GridWorld
-from qmap.utils.csv_logger import CSVLogger
+from qmap.csv_logger import CSVLogger
 
 
 seed=0

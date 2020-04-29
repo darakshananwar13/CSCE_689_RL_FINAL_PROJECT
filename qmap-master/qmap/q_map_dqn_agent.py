@@ -9,7 +9,7 @@ import os
 import tensorflow as tf
 
 from qmap.q_map_renderer import Q_Map_Renderer
-from qmap.utils.csv_logger import CSVLogger
+from qmap.csv_logger import CSVLogger
 
 
 class DQN():
