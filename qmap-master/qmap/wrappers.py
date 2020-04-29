@@ -1,8 +1,6 @@
 from gym import Wrapper
 
 from qmap.csv_logger import CSVLogger
-
-
 class PerfLogger(Wrapper):
     def __init__(self, env, gamma, path):
         super(PerfLogger, self).__init__(env)

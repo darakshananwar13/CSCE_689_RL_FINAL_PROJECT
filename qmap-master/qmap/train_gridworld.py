@@ -14,7 +14,6 @@ from qmap.q_map_dqn_agent import Q_Map
 from qmap.gridworld import GridWorld
 from qmap.csv_logger import CSVLogger
 
-
 seed=0
 n_steps=1000
 path_name='results'
