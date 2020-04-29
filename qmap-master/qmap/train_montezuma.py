@@ -41,7 +41,7 @@ dqn_model = ConvMlp(
         hiddens=[1024],
         dueling=True,
     )
-    exploration_schedule = LinearSchedule(schedule_timesteps=n_steps, initial_p=1.0, final_p=0.05)
+exploration_schedule = LinearSchedule(schedule_timesteps=n_steps, initial_p=1.0, final_p=0.05)
 ########################################################
 double_replay_buffer = DoublePrioritizedReplayBuffer(int(5e5), alpha=0.6, epsilon=1e-6, timesteps=n_steps, initial_p=0.4, final_p=1.0)
 agent_name = '{}M'.format(n_steps//int(1e6))
