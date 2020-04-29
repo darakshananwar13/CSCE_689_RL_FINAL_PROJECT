@@ -9,7 +9,7 @@ from qmap.q_map_dqn_agent import Q_Map_DQN_Agent
 from qmap.replay_buffers import DoublePrioritizedReplayBuffer
 from qmap.custom_mario import CustomSuperMarioAllStarsEnv
 from qmap.wrappers import PerfLogger
-n_steps = 1e3
+n_steps = int(1000)
 seed=0
 model_save=100000
 path="qmap_results"
