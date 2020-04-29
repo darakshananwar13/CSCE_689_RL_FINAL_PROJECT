@@ -95,9 +95,9 @@ for t in range(n_steps // q_map.batch_size + 1):
         prev_ob = env.random_reset()
         ac = env.action_space.sample()
         ob = env.step(ac)[0]
-        prev_frames, (_, _, prev_w), _, _ = prev_ob
+        prev_frame, (_, _, prev_w), _, _ = prev_ob
         frames, (row, col, w), _, _ = ob
-        prev_frames.append(prev_frames)
+        prev_frames.append(prev_frame)
         batch_ac.append(ac)
         batch_rcw.append((row, col-w, w-prev_w))
         batch_frames.append(frames)
